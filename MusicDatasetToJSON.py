@@ -4,8 +4,8 @@ from mutagen.easyid3 import EasyID3
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
 
-music_directory = "F:/Sakamichi" # sesuaikan dengan folder yang mau diambil datanya
-cover_directory = "F:/Sakamichi/cover" # sesuaikan dengan folder yang mau diambil datanya
+music_directory = "F:/Sakamichi"
+cover_directory = "F:/Sakamichi/cover"
 
 def collect_music_data(music_folder, cover_folder):
     data = []
@@ -29,16 +29,26 @@ def collect_music_data(music_folder, cover_folder):
             
             title = audiofile.get('title', [os.path.splitext(file)[0]])[0]
             artist = audiofile.get('artist', ["Unknown"])[0]
+            album_artist = audiofile.get('albumartist', ["Unknown"])[0]
+            album = audiofile.get('album', ["Unknown"])[0]
             
-            cover_path = os.path.join(cover_folder, f"{title}.jpg")
+            cover_file = f"{album}.jpg" if album != "Unknown" else f"{title}.jpg"
+            cover_path = os.path.join(cover_folder, cover_file)
+            if not os.path.isfile(cover_path):
+                cover_path = ""
             
             song_data = {
                 "title": title,
                 "artist": artist,
+                "album": album,
+                "album_artist": album_artist,
                 "song_path": full_path,
                 "cover_path": cover_path
             }
             data.append(song_data)
+    
+    # Sort and group data by album
+    data.sort(key=lambda x: (x['album'], x['title']))
     return data
 
 music_data = collect_music_data(music_directory, cover_directory)
